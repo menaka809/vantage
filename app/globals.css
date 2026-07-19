@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-bg: #0C0C0C;
+  --color-surface: #1F1F1F;
+  --color-surface-2: #171717;
+  --color-offwhite: #EDEAE3;
+  --color-accent: #FF4D2E;
+  --color-highlight: #D9FF3D;
+  --color-muted: #7C7C78;
+  --color-border: #262624;
+
+  --font-display: var(--font-clash), "Arial Narrow", sans-serif;
+  --font-sans: var(--font-general), system-ui, sans-serif;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: auto;
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+body {
+  background-color: #0C0C0C;
+  color: #EDEAE3;
+  font-family: var(--font-general), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+.font-display {
+  font-family: var(--font-clash), "Arial Narrow", sans-serif;
+}
+
+::selection {
+  background: #FF4D2E;
+  color: #0C0C0C;
+}
+
+/* Hide the native cursor where we render a custom one (fine pointers only) */
+@media (pointer: fine) {
+  html.custom-cursor,
+  html.custom-cursor * {
+    cursor: none !important;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0c0c0c;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2a28;
+}
+
+/* Kinetic type: each letter is an inline-block so we can transform it */
+.kinetic-letter {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* Premium film grain */
+.grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.06;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+  @media (pointer: fine) {
+    html.custom-cursor,
+    html.custom-cursor * {
+      cursor: auto !important;
+    }
+  }
+}
