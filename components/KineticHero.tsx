@@ -110,7 +110,7 @@ export default function KineticHero() {
         ref={headingRef}
         className="relative left-1/2 w-screen -translate-x-1/2 font-display font-semibold leading-[0.78] tracking-tight text-offwhite"
       >
-        <span className="flex justify-center text-[21vw]">
+        <span className="flex justify-center text-[17vw]">
           {WORD.split("").map((ch, i) => (
             <span key={i} className="inline-block">
               <motion.span
