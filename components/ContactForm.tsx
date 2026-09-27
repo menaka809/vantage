@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -13,6 +14,8 @@ const schema = z.object({
   email: z.string().min(1, "Your email?").pipe(z.email("Check that email")),
   service: z.string().min(1, "Pick one"),
   message: z.string().min(1, "Tell us a little"),
+  // Honeypot — hidden field, must stay empty.
+  company: z.string().optional(),
 });
 type Values = z.infer<typeof schema>;
 
@@ -30,8 +33,33 @@ export default function ContactForm() {
     handleSubmit,
     watch,
     reset,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
+    formState: { errors, isSubmitting },
   } = useForm<Values>({ resolver: zodResolver(schema), mode: "onTouched" });
+
+  const [sent, setSent] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const onSubmit = async (data: Values) => {
+    setSubmitError(null);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || json?.ok === false) {
+        setSubmitError(json?.error || "Something went wrong. Please try again.");
+        return;
+      }
+      setSent(true);
+      reset();
+    } catch {
+      setSubmitError(
+        "Network error — please check your connection and try again."
+      );
+    }
+  };
 
   const v = watch();
   const valid = {
@@ -47,7 +75,7 @@ export default function ContactForm() {
     onMouseLeave: () => setVariant("default"),
   };
 
-  if (isSubmitSuccessful) {
+  if (sent) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -68,7 +96,7 @@ export default function ContactForm() {
           <span className="text-muted">We&rsquo;ll reply within two days.</span>
         </p>
         <button
-          onClick={() => reset()}
+          onClick={() => setSent(false)}
           onMouseEnter={() => setVariant("link")}
           onMouseLeave={() => setVariant("default")}
           className="text-xs uppercase tracking-widest text-muted underline decoration-border underline-offset-4 transition-colors hover:text-offwhite"
@@ -80,7 +108,17 @@ export default function ContactForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onNoop)} noValidate className="space-y-9">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-9">
+      {/* Honeypot — hidden from people, irresistible to bots */}
+      <input
+        {...register("company")}
+        type="text"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="pointer-events-none absolute left-[-9999px] h-0 w-0 opacity-0"
+      />
+
       {/* Completion progress */}
       <div>
         <div className="mb-2 flex items-center justify-between">
@@ -174,6 +212,9 @@ export default function ContactForm() {
             )}
           </button>
         </Magnetic>
+        {submitError && (
+          <span className="w-full text-xs text-accent">{submitError}</span>
+        )}
         <span className="text-xs text-muted">
           {done < 4 ? (
             <>
@@ -192,10 +233,6 @@ export default function ContactForm() {
       </div>
     </form>
   );
-}
-
-async function onNoop() {
-  await new Promise((r) => setTimeout(r, 1000));
 }
 
 function FieldLabel({
